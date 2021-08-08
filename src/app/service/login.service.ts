@@ -3,6 +3,7 @@ import { HttpHeaders, HttpClient } from '@angular/common/http';
 import { retry, catchError } from 'rxjs/operators';
 import { Observable, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { Credential } from '../models/credential';
 
 @Injectable({
   providedIn: 'root'
@@ -10,21 +11,22 @@ import { environment } from 'src/environments/environment';
 export class LoginService {
 
   authenticateUri = 'authenticate';
-  loggedInUser = 'logged-in-user';
+  loggedInUserUri = 'logged-in-user';
+  logoutUri = 'logout';
 
   constructor(private httpClient: HttpClient) { }
 
-  login = (credential): Observable<any> => {
+  login = (credential: Credential): Observable<any> => {
     return this.httpClient.post<any>(environment.baseURL + this.authenticateUri, credential).pipe(
       catchError(this.handleError)
     );
   }
 
-  handleError = error => {
+  handleError = (error) => {
     return throwError(error);
   }
 
-  saveToken = (token) => {
+  saveToken = (token: string) => {
     localStorage.setItem('token', token);
   }
 
@@ -37,8 +39,18 @@ export class LoginService {
   }
 
   getLoggedInUser = (): Observable<any> => {
-    return this.httpClient.get<any>(environment.baseURL + this.loggedInUser).pipe(
+    return this.httpClient.get<any>(environment.baseURL + this.loggedInUserUri).pipe(
       catchError(this.handleError)
     );
+  }
+
+  logout = (): Observable<any> => {
+    return this.httpClient.get<any>(environment.baseURL + this.logoutUri).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  removeJwtToken = () => {
+    return localStorage.removeItem('token')
   }
 }
